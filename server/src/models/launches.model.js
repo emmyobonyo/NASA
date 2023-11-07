@@ -1,24 +1,38 @@
-// const launches = require('./launches.mongo');
+const launchesDatabase = require('./launches.mongo');
 
-let launches = new Map();
+const launches = new Map();
 
 let latestFlightNumber = 100;
 
 const launch = {
-  flightNumber: 100,
+  flightNumber: 102,
   mission: 'Kepler Exploration X',
   rocket: 'Explore IS1',
   launchDate: new Date('December 27, 2030'),
-  Destination: 'Kepler-442 b',
+  destination: 'Another planet as well',
   Customers: ['ZTM', 'NASA'],
   upcoming: true,
   success: true,
 };
 
-launches.set(launch.flightNumber, launch)
+saveLaunch(launch)
 
 function existsLaunchWithId(launchId) {
   return launches.has(launchId);
+}
+
+async function getAllLaunches() {
+  return await launchesDatabase
+    .find({}, { '_id': 0, '__v': 0 });
+}
+
+
+async function saveLaunch(launch) {
+  await launchesDatabase.updateOne({
+    flightNumber: launch.flightNumber,
+  }, launch, {
+    upsert: true,
+  })
 }
 
 function addNewLaunch(launch) {
@@ -45,4 +59,5 @@ module.exports = {
   launches,
   addNewLaunch,
   abortLaunchById,
+  getAllLaunches,
 }

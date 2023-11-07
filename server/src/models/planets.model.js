@@ -4,8 +4,6 @@ const { parse } = require('csv-parse');
 
 const planets = require('./planets.mongo');
 
-const habitablePlanets = [];
-
 function isHabitablePlanet(planet) {
   return planet['koi_disposition'] === 'CONFIRMED'
     && planet['koi_insol'] > 0.36 && planet['koi_insol'] < 1.11
@@ -21,24 +19,40 @@ function loadPlanetsData() {
       }))
       .on('data', async (data) => {
         if (isHabitablePlanet(data)) {
-          await planets.create({
-            keplerName: data.keplerName,
-          });
+          savePlanet(data);
         }
       })
       .on('error', (err) => {
         console.log(err);
         reject(err);
       })
-      .on('end', () => {
-        console.log(`Number: ${habitablePlanets.length}`)
-        resolve(habitablePlanets)
+      .on('end', async() => {
+        const planetsFound = (await getAllPlanets()).length
+        console.log(`Number: ${planetsFound}`)
+        resolve()
       });
   })
 }
 
-function getAllPlanets() {
-  return habitablePlanets;
+async function getAllPlanets() {
+  return await planets.find({}, {
+    '_id': 0,
+    '__v': 0,
+  });
+}
+
+async function savePlanet(planet) {
+  try {
+    await planets.updateOne({
+      keplerName: planet.keplerName
+    }, {
+      keplerName: planet.keplerName
+    }, {
+      upsert: true,
+    })
+  } catch(err) {
+    console.log('Could not save the planet: ' + err)
+  }
 }
 
 
