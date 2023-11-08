@@ -1,6 +1,6 @@
 const {
   launches,
-  addNewLaunch,
+  scheduleNewLaunch,
   existsLaunchWithId,
   abortLaunchById,
   getAllLaunches,
@@ -10,16 +10,8 @@ async function httpGetAllLaunches (req, res) {
   return res.status(200).json(await getAllLaunches());
 }
 
-function httpAddNewLaunch(req, res) {
+async function httpAddNewLaunch(req, res) {
   const launch = req.body
-
-  for (var i = 0; i < Array.from(launches.values()).length; i++) {
-    if (Array.from(launches.values())[i].mission === launch.mission) {
-      return res.status(400).json({
-        error: 'The launch already exists'
-      })
-    }
-  }
 
   if (!launch.mission || !launch.rocket || !launch.launchDate || !launch.destination) {
     return res.status(400).json({
@@ -35,7 +27,7 @@ function httpAddNewLaunch(req, res) {
     })
   }
 
-  addNewLaunch(launch);
+  await scheduleNewLaunch(launch);
   return res.status(201).json(launch);
 }
 
