@@ -8,14 +8,14 @@ const DEFAULT_FLIGHT_NUMBER = 100;
 const launches = new Map();
 
 const launch = {
-  flightNumber: 102,
-  mission: 'Kepler Exploration X',
-  rocket: 'Explore IS1',
-  launchDate: new Date('December 27, 2030'),
-  destination: 'Kepler-296 A f',
-  Customers: ['ZTM', 'NASA'],
-  upcoming: true,
-  success: true,
+  flightNumber: 102, //flight number
+  mission: 'Kepler Exploration X', //name
+  rocket: 'Explore IS1', //rocket.name
+  launchDate: new Date('December 27, 2030'), //date_local
+  destination: 'Kepler-296 A f', // not applicable
+  Customers: ['ZTM', 'NASA'], //payload.customers for each load
+  upcoming: true, //upcoming
+  success: true, // success
 };
 
 saveLaunch(launch)
@@ -24,7 +24,44 @@ const SPACEX_API_URL = 'https://api.spacexdata.com/v4/launches/query'
 
 async function loadLaunchData(launch){
   console.log('Loading launch data');
-  await axios.post('');
+  const response = await axios.post(SPACEX_API_URL, {
+    query: {},
+      options: {
+        populate: [
+          {
+            path: 'rocket',
+            select: {
+              name: 1
+            }
+          },
+          {
+            path: 'payloads',
+            select: {
+              'customers': 1
+            }
+          }
+        ]
+      }
+  });
+
+  const launchDocs = response.data.docs;
+  for (const launchDoc of launchDocs) {
+    const payloads = launchDoc['payloads'];
+    const customers = payloads.flatMap((payload) => {
+      return payload['customers'];
+    })
+    const launch = {
+      flightNumber: launchDoc['flight_number'],
+      mission: launchDoc['name'],
+      rocket: launchDoc['rocket']['name'],
+      launchDate: launchDoc['date_local'],
+      upcoming: launchDoc['upcoming'],
+      success: launchDoc['success'],
+      customers
+    };
+
+    console.log(launch);
+  }
 }
 
 async function existsLaunchWithId(launchId) {
