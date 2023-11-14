@@ -5,20 +5,20 @@ const planets = require('./planets.mongo');
 
 const DEFAULT_FLIGHT_NUMBER = 100;
 
-const launches = new Map();
+// const launches = new Map();
 
-const launch = {
-  flightNumber: 102, //flight number
-  mission: 'Kepler Exploration X', //name
-  rocket: 'Explore IS1', //rocket.name
-  launchDate: new Date('December 27, 2030'), //date_local
-  destination: 'Kepler-296 A f', // not applicable
-  Customers: ['ZTM', 'NASA'], //payload.customers for each load
-  upcoming: true, //upcoming
-  success: true, // success
-};
+// const launch = {
+//   flightNumber: 102, //flight number
+//   mission: 'Kepler Exploration X', //name
+//   rocket: 'Explore IS1', //rocket.name
+//   launchDate: new Date('December 27, 2030'), //date_local
+//   destination: 'Kepler-296 A f', // not applicable
+//   Customers: ['ZTM', 'NASA'], //payload.customers for each load
+//   upcoming: true, //upcoming
+//   success: true, // success
+// };
 
-saveLaunch(launch)
+// saveLaunch(launch)
 
 const SPACEX_API_URL = 'https://api.spacexdata.com/v4/launches/query'
 
@@ -108,10 +108,10 @@ async function getLatestFlightNumber() {
 async function getAllLaunches(skip, limit) {
   return await launchesDatabase
     .find({}, { '_id': 0, '__v': 0 })
+    .sort({ flightNumber: -1})
     .skip(skip)
     .limit(limit);
 }
-
 
 async function saveLaunch(launch) {
   /* const planet = await planets.findOne({
@@ -162,7 +162,6 @@ async function abortLaunchById(launchId) {
 module.exports = {
   loadLaunchData,
   existsLaunchWithId,
-  launches,
   scheduleNewLaunch,
   abortLaunchById,
   getAllLaunches,
